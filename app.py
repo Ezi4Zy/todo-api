@@ -5,7 +5,7 @@
 # @File:   app.py
 # @Date:   2016-06-17 14:54:40
 
-from flask import Flask, jsonify, abort, make_response, request
+from flask import Flask, jsonify, abort, make_response, request, url_for
 
 app = Flask(__name__)
 
@@ -25,9 +25,19 @@ tasks = [
 ]
 
 
+def make_public_task(task):
+    new_task = {}
+    for field in task:
+        if field == 'id':
+            new_task['uri'] = url_for('get_task', task_id=task['id'], _external=True)
+        else:
+            new_task[field] = task[field]
+    return new_task
+
+
 @app.route('/todo/api/v1.0/tasks', methods=['GET'])
 def get_tasks():
-    return jsonify({'tasks': tasks})
+    return jsonify({'tasks': list(map(make_public_task, tasks))})
 
 
 @app.route('/todo/api/v1.0/tasks', methods=['POST'])
